@@ -30,7 +30,7 @@ export default class App extends Component {
 		this.state = {
 			loggedIn: false,
 			current_nid: 0,
-			class_list: ['COP3502','COP3503','COP3330','COP3223','CDA3103'],			
+			class_list: ['COP3502','COP3503','COP3330','COP3223','CDA3103', "CLASS 5"],			
 		}
 	}
 	
