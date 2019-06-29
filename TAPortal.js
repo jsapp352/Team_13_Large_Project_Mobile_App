@@ -1,6 +1,6 @@
 import React from 'react'
 import {Text,TextInput,Button, View} from 'react-native'
-
+import WaitList from './WaitList'
 
 export default class TAPortal extends React.Component
 {
@@ -44,7 +44,7 @@ export default class TAPortal extends React.Component
 		}
 		else
 		{
-			return(<Text>Now We are in the TA portal. Need UI</Text>);
+			return(<WaitList status='ta' />);
 		}
 	}
 }

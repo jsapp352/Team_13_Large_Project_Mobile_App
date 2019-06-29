@@ -80,7 +80,7 @@ export default class App extends Component {
 		else
 		{
 			// return (<Text>{this.state.current_nid}</Text>)
-			return(<WaitList />)
+			return(<WaitList status='student' />)
 		}
 	}
 }
