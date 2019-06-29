@@ -10,7 +10,6 @@ import React, {Component} from 'react';
 import {Platform,Picker, StyleSheet, Text,TouchableOpacity,
 		TextInput, View, Button} from 'react-native';
 import Student from './Student'
-import Header from './Header'
 import TAPortal from './TAPortal'
 
 
