@@ -8,11 +8,10 @@
 
 import React, {Component} from 'react';
 import {Platform,Picker, StyleSheet, Text,TouchableOpacity,
-		TextInput, View, Button} from 'react-native';
-import Student from './Student'
-import TAPortal from './TAPortal'
-import Styling from './Styling.js'
-
+		TextInput,Image, View, Button, Modal, ImageBackground} from 'react-native';
+import Student from './Student';
+import TAPortal from './TAPortal';
+import ImageOverlay from 'react-native-image-overlay';
 
 //This is placeholder for cross platform debugging in the future
 
@@ -56,10 +55,14 @@ export default class App extends Component {
 		if(this.state.user === false)
 		{
 			return(
-				<View style={style.header}>
-					<Text style={style.header}>Select Status:</Text>
-					<TouchableOpacity onPress={this.studentLogin}><Text style={styles.button}>Student</Text></TouchableOpacity>
-					<TouchableOpacity onPress={this.taLogin}><Text style={styles.button}>Assistant</Text></TouchableOpacity>
+				<View style={styles.container}>
+					<ImageBackground source={require('./img_cave.jpg')} style={{flex:1, width:'100%', height:'100%'}}>
+						<View style={styles.overlay}>
+								<Text style={styles.welcome}>Select Status:</Text>
+								<TouchableOpacity onPress={this.studentLogin}><Text style={styles.button}>Student</Text></TouchableOpacity>
+								<TouchableOpacity onPress={this.taLogin}><Text style={styles.button}>Assistant</Text></TouchableOpacity>
+						</View>	
+					</ImageBackground>
 				</View>
 			);
 		}
@@ -81,102 +84,8 @@ export default class App extends Component {
 	}
 }
 
-const style = {
-	circle: {
-    marginTop: 0,
-    marginRight: 40,
-    marginBottom: 10,
-    marginLeft: 40,
-    minWidth: 90,
-    minHeight: 90,
-    borderRadius: 50,
-    backgroundColor: 'rgba(0, 0, 0, 1)',
-    fontSize: 12,
-    color: '#fff',
-    fontWeight: '700',
-    textAlign: 'center',
-    // verticalAlign: 'center',
-    lineHeight: 90
-  },
-  header: {
-    paddingTop: 0,
-    paddingRight: 0,
-    paddingBottom: 0,
-    paddingLeft: 0
-  },
-  topBar: {
-    backgroundColor: '#000',
-    height: 60
-  },
-  title: {
-    color: '#fff',
-    fontWeight: '500',
-    letterSpacing: 8,
-    fontSize: 20,
-    marginLeft: 20,
-    // verticalAlign: 'middle',
-    lineHeight: 60,
-    // float: 'left'
-  },
-  // information: {
-  //   backgroundColor: '#e0b400',
-  //   // backgroundImage: 'url(../img/bg-ucf.png)',
-  //   backgroundPosition: 'top',
-  //   height: 230
-  // },
-  circleContainer: {
-    height: 'inherit',
-    alignItems: 'center',
-    marginTop: 0,
-    marginRight: 'auto',
-    marginBottom: 0,
-    marginLeft: 'auto',
-    textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    justifyContent: 'center'
-  },
-  caption: {
-    paddingTop: 30,
-    color: '#fff',
-    fontWeight: '500'
-  },
-  'menu-item': {
-    textAlign: 'center',
-    marginTop: 20,
-    marginRight: 0,
-    marginBottom: 20,
-    marginLeft: 0,
-    color: '#000'
-  },
-  'menu-icon': {
-    fontSize: 12
-  },
-  line: {
-    height: 1,
-    width: '50%',
-    marginTop: 0,
-    marginRight: 'auto',
-    marginBottom: 0,
-    marginLeft: 'auto',
-    backgroundColor: '#eaeaea'
-  },
-  'sub-title': {
-    color: '#000',
-    fontWeight: '700',
-    fontSize: 12,
-    marginBottom: 20
-  },
-  'course-card': {
-    width: 250,
-    marginRight: '5%'
-  }
-
-}
-
 // Needs Styling
-const styles = {
+const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		justifyContent: 'center',
@@ -186,7 +95,10 @@ const styles = {
 	welcome: {
 		fontSize: 20,
 		textAlign: 'center',
-		margin: 10,
+		justifyContent: 'center',
+		margin: 30,
+		marginBottom: 20,
+		color: 'black',
 	},
 	instructions: {
 		textAlign: 'center',
@@ -194,18 +106,34 @@ const styles = {
 		marginBottom: 5,
 	},
 	button: {
-	    backgroundColor: 'gray',
-   		borderColor: 'white',
+		backgroundColor: 'rgba(32, 32, 32, 0.3)',
+   		borderColor: 'rgba(12, 12, 12, 0.2)',
 	    borderWidth: 1,
-	    borderRadius: 12,
-	    color: 'white',
+	    borderRadius: 11,
+	    color: 'black',
 	    fontSize: 24,
 	    fontWeight: 'bold',
 	    overflow: 'hidden',
-	    padding: 12,
+	    padding: 7,
 		textAlign:'center',
+		alignContent: 'center',
+		bottom: 10,
+		marginTop:10,
+		marginBottom:10,
+		marginLeft: 50,
+		marginRight: 50,
+	},
+	overlay:{
+		marginTop: 215,
+		marginBottom:50,
+		marginRight:50,
+		marginLeft:50,
+		justifyContent:'center',
+		borderRadius: 20,
+		textAlign:'center',
+		backgroundColor:'rgba(255, 255, 255, .9)',
 	}
-}
+});
 
 
 // <Picker.Item label="COP3502" value="cs1" />

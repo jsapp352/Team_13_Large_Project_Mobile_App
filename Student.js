@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {Platform,Picker, StyleSheet, Text, TextInput, View, Button} from 'react-native';
+import {Platform,Picker, ImageBackground, StyleSheet, Text, TextInput, View, Button} from 'react-native';
 import WaitList from './WaitList'
 import { createBottomTabNavigator, createAppContainer } from 'react-navigation'
 //This is placeholder for cross platform debugging in the future
@@ -64,6 +64,7 @@ export default class App extends Component {
 		{
 			return (
 				<View style={styles.container}>
+				<ImageBackground source={require('./img_cave.jpg')} style={{flex:1, width:'100%', height:'100%'}}>
 					<Text style={styles.welcome}>Welcome to the Cave</Text>
 					<Text style={styles.welcome}>Please Check in</Text>
 					<TextInput onChangeText={this.handleChange} maxLength={8} placeholder="Enter NID"></TextInput>
@@ -74,6 +75,7 @@ export default class App extends Component {
 						})}
 					</Picker>
 					<Button onPress={this.handleClick} title='Check in'></Button>
+				</ImageBackground>
 				</View>
 			);
 		}
