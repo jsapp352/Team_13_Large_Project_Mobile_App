@@ -9,13 +9,13 @@ export default StyleSheet.create(
     marginLeft: 40,
     minWidth: 90,
     minHeight: 90,
-    borderRadius: '50%',
+    borderRadius: 50,
     backgroundColor: 'rgba(0, 0, 0, 1)',
-    fontSize: '2em',
+    fontSize: 12,
     color: '#fff',
     fontWeight: '700',
     textAlign: 'center',
-    verticalAlign: 'middle',
+    // verticalAlign: 'center',
     lineHeight: 90
   },
   header: {
@@ -32,18 +32,18 @@ export default StyleSheet.create(
     color: '#fff',
     fontWeight: '500',
     letterSpacing: 8,
-    fontSize: '1.8em',
+    fontSize: 20,
     marginLeft: 20,
-    verticalAlign: 'middle',
+    // verticalAlign: 'middle',
     lineHeight: 60,
-    float: 'left'
+    // float: 'left'
   },
-  information: {
-    backgroundColor: '#e0b400',
-    backgroundImage: 'url(../img/bg-ucf.png)',
-    backgroundPosition: 'top',
-    height: 230
-  },
+  // information: {
+  //   backgroundColor: '#e0b400',
+  //   // backgroundImage: 'url(../img/bg-ucf.png)',
+  //   backgroundPosition: 'top',
+  //   height: 230
+  // },
   circleContainer: {
     height: 'inherit',
     alignItems: 'center',
@@ -71,7 +71,7 @@ export default StyleSheet.create(
     color: '#000'
   },
   'menu-icon': {
-    fontSize: '2.5em'
+    fontSize: 12
   },
   line: {
     height: 1,
@@ -85,7 +85,7 @@ export default StyleSheet.create(
   'sub-title': {
     color: '#000',
     fontWeight: '700',
-    fontSize: '1.5em',
+    fontSize: 12,
     marginBottom: 20
   },
   'course-card': {

@@ -28,14 +28,14 @@ export default class WaitList extends React.Component
 	{
 		this.setState({modalVisible:visible})
 	}
-	// method to populate list. Fetch Request should happen here
+
 	// Method should be called prior to render()-> componentWillMount
 	populateList()
 	{
 			
 	}
 
-	// Will fetch from api and call populateList.
+	// Will fetch from api and call populateList with proper data
 	componentWillMount()
 	{
 
@@ -47,6 +47,16 @@ export default class WaitList extends React.Component
 		// Update state to show current list
 		// remove modal
 		this.setModal(false);		
+	}
+
+	removeStudent()
+	{
+
+	}
+
+	markAbsent()
+	{
+
 	}
 
 	handleClick()
@@ -72,7 +82,7 @@ export default class WaitList extends React.Component
 		{
 			return( 
 				<View style={styles.container}>
-					<Button title='Home' onPress={() => {this.setState({backPushed:true})}}></Button>
+					<Button title='Fuck Go Back' onPress={() => {this.setState({backPushed:true})}}></Button>
 					<Text style={styles.welcome}>Estimated Wait Time: {data.length * this.state.current_avg_session_time / this.state.current_num_ta} mins</Text>
 					<Text>Current List:</Text>
 					<FlatList

@@ -66,9 +66,9 @@ export default class App extends Component {
 				<View style={styles.container}>
 					<Text style={styles.welcome}>Welcome to the Cave</Text>
 					<Text style={styles.welcome}>Please Check in</Text>
-					<TextInput onChangeText={this.handleChange} maxLength={10} placeholder="Enter NID"></TextInput>
+					<TextInput onChangeText={this.handleChange} maxLength={8} placeholder="Enter NID"></TextInput>
 					<Text>Select Class</Text>
-					<Picker style={{height: 50, width: 150}}>
+					<Picker selectedValue={this.state.pickerValue} onValueChange={(value)=>{this.setState({pickerValue:value})}} style={{height: 50, width: 150}}>
 						{this.state.class_list.map(function(d, id){
 							return (<Picker.Item key={d} label={d}/>)
 						})}
