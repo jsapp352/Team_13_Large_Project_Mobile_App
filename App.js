@@ -12,6 +12,8 @@ import {Platform,Picker, StyleSheet, Text,TouchableOpacity,
 import Student from './Student';
 import TAPortal from './TAPortal';
 import ImageOverlay from 'react-native-image-overlay';
+import WaitList from './WaitList'
+import TabNavigator from './TabNavigator'
 
 //This is placeholder for cross platform debugging in the future
 
@@ -51,18 +53,17 @@ export default class App extends Component {
 	}
 
 	// Picker PlaceHolder should be replaced with API fetch
-	render() {
+	render(props) {
+
+
+		console.log(props)
 		if(this.state.user === false)
 		{
 			return(
 				<View style={styles.container}>
-					<ImageBackground source={require('./img_cave.jpg')} style={{flex:1, width:'100%', height:'100%'}}>
-						<View style={styles.overlay}>
-								<Text style={styles.welcome}>Select Status:</Text>
-								<TouchableOpacity onPress={this.studentLogin}><Text style={styles.button}>Student</Text></TouchableOpacity>
-								<TouchableOpacity onPress={this.taLogin}><Text style={styles.button}>Assistant</Text></TouchableOpacity>
-						</View>	
-					</ImageBackground>
+					<TouchableOpacity onPress={this.taLogin}><Text>TA</Text></TouchableOpacity>
+					<TabNavigator />
+					<WaitList status='student'/>
 				</View>
 			);
 		}
@@ -75,10 +76,6 @@ export default class App extends Component {
 			else if(this.state.ta)
 			{
 				return (<TAPortal />)
-			}
-			else
-			{
-				alert('woops')
 			}
 		}
 	}
@@ -141,3 +138,12 @@ const styles = StyleSheet.create({
 // 						<Picker.Item label="COP3330" value="oop" />
 // 						<Picker.Item label="CDA3103" value="comporg" />
 // 						<Picker.Item label="COP3223" value="intro" />
+
+
+// <ImageBackground source={require('./img_cave.jpg')} style={{flex:1, width:'100%', height:'100%'}}>
+// 						<View style={styles.overlay}>
+// 								<Text style={styles.welcome}>Select Status:</Text>
+// 								<TouchableOpacity onPress={this.studentLogin}><Text style={styles.button}>Student</Text></TouchableOpacity>
+// 								<TouchableOpacity onPress={this.taLogin}><Text style={styles.button}>Assistant</Text></TouchableOpacity>
+// 						</View>	
+// 					</ImageBackground>

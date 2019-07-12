@@ -3,7 +3,6 @@ import {FlatList, Modal, TouchableHighlight, Button, StyleSheet, Text, View} fro
 import {ListItem} from "react-native"
 import App from './App'
 
-
 export default class WaitList extends React.Component
 {
 	constructor()
@@ -82,7 +81,6 @@ export default class WaitList extends React.Component
 		{
 			return( 
 				<View style={styles.container}>
-					<Button title='Fuck Go Back' onPress={() => {this.setState({backPushed:true})}}></Button>
 					<Text style={styles.welcome}>Estimated Wait Time: {data.length * this.state.current_avg_session_time / this.state.current_num_ta} mins</Text>
 					<Text>Current List:</Text>
 					<FlatList

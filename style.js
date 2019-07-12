@@ -1,4 +1,6 @@
-const styles = StyleSheet.create({
+import {StyleSheet} from 'react-native';
+
+export const style = StyleSheet.create({
 	container: {
 		flex: 1,
 		justifyContent: 'center',
@@ -44,6 +46,6 @@ const styles = StyleSheet.create({
 		justifyContent:'center',
 		borderRadius: 20,
 		textAlign:'center',
-		backgroundColor:'rgba(255, 255, 255, .9)',
+		backgroundColor:'rgba(255, 255, 255, .7)',
 	}
 });
