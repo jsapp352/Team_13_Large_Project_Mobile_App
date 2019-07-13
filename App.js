@@ -61,7 +61,7 @@ export default class App extends Component {
 		{
 			return(
 				<View style={styles.container}>
-					<TouchableOpacity onPress={this.taLogin}><Text>TA</Text></TouchableOpacity>
+					<TouchableOpacity style={{justifyContent:'flex-start'}}onPress={this.taLogin}><Text>TA</Text></TouchableOpacity>
 					<TabNavigator />
 					<WaitList status='student'/>
 				</View>
