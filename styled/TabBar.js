@@ -10,6 +10,7 @@ export default class TabBar extends React.Component {
 		super();
 		this.state = {
 			courses:['CS1','CS2','OOP','CDA','POOP','C','COT'],
+			waitlist:['Kim','Tim','Mike','Ivan','Andy','Tony','Shad','Justin','Don','Megan','Jones'],
 			current_selection: '',
 			user: false,
 			student:false,
@@ -21,8 +22,7 @@ export default class TabBar extends React.Component {
 	
 	movePage()
 	{
-		const nav = this.props.navigation;
-		nav.navigate('TA')
+		this.setState({TA:true})
 	}
 
 	toggleSignIn()
@@ -41,12 +41,15 @@ export default class TabBar extends React.Component {
 		{
 			arr.push(<Tab key={i} heading={this.state.courses[i]}></Tab>)
 		}
-
+		if(this.state.TA)
+		{
+			return <WaitList list={this.state.waitlist} />
+		}
 		return (
 			<Container style={styles.container}>
 				<Header hasTabs ><Tabs>{arr}</Tabs></Header>
-					<ScrollView><WaitList view='student'/></ScrollView>
-					<Button block primary onPress={this.movePage}style={styles.mb15}>
+					<ScrollView><WaitList list={this.state.waitlist} view='student'/></ScrollView>
+					<Button block primary onPress={this.movePage}style={{marginBottom: 5, marginTop: 18}}>
 		            	<Text>TA Access</Text>
 		        	</Button>
 					<Button block primary onPress={this.toggleSignIn} style={styles.mb15}>
