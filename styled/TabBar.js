@@ -49,11 +49,14 @@ export default class TabBar extends React.Component {
 			<Container style={styles.container}>
 				<Header hasTabs ><Tabs>{arr}</Tabs></Header>
 					<ScrollView><WaitList list={this.state.waitlist} view='student'/></ScrollView>
-					<Button block primary onPress={this.movePage}style={{marginBottom: 5, marginTop: 18}}>
+					<Button small block primary onPress={this.movePage}style={{marginBottom: 5, marginTop: 18}}>
 		            	<Text>TA Access</Text>
 		        	</Button>
-					<Button block primary onPress={this.toggleSignIn} style={styles.mb15}>
+					<Button small block primary onPress={this.toggleSignIn} style={styles.mb15}>
 		            	<Text>Student Sign In</Text>
+		        	</Button>
+					<Button small block primary onPress={this.toggleSignIn} style={styles.mb15}>
+		            	<Text>Need Help?</Text>
 		        	</Button>
 					<Modal
 						animationType="slide"
