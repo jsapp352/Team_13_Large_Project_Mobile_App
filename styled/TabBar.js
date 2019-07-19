@@ -75,7 +75,7 @@ export default class TabBar extends React.Component {
 				}	
 			}
 
-			this.setState({courses:course_arr, course_ids:course_ids});
+			this.setState({courses:course_arr, course_ids:course_ids, loading:false});
 		});
 
 	

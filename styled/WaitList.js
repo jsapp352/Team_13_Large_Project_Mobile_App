@@ -34,7 +34,7 @@ export default class WaitList extends Component {
 	
 		this.state= {
 			current_course: '',
-			current_list: props.list,
+			current_list: [],
 			course_list: [],
 			course_ids: [],
 			current_status: ['h','h','h','w','w','w','w','w'],
@@ -56,6 +56,7 @@ export default class WaitList extends Component {
 			ta_time_in: null,
 			ta_time_out: null,
 			in_selected: true,
+			loading: true,
 		}
 		this.toggleModal = this.toggleModal.bind(this);
 		this.selectStudent = this.selectStudent.bind(this);
@@ -203,12 +204,13 @@ export default class WaitList extends Component {
 				let ext = course_ids[i];	
 				let nested_url = 'https://protected-shelf-85013.herokuapp.com/session/waiting/'+ ext +'/';
 				fetch(nested_url).then(res => res.json()).then(list=>{
-				temp_list.push(list);
+				
+					temp_list.push(list);
 			})}
 
-			this.setState({course_list:course_arr, course_ids:course_ids});
+		this.setState({course_list:course_arr, course_ids:course_ids});
+		this.setState({current_list:temp_list, loading:false})
 		});
-
 		console.log(temp_list);
 	}
 	
@@ -257,18 +259,36 @@ export default class WaitList extends Component {
 
 	render(props) 
 	{
-	
+
+		console.log(this.state.course_ids);
+		let x = 0;
+		for(let i = 0; i < this.state.current_list.length; i++)
+		{
+			if(this.state.course_ids[i] === this.props.courseId)
+			{
+				x = i;
+				console.log('found x = ' + i)
+			}
+		}
+		if(this.state.loading  || this.state.current_list[x] == undefined)
+		{
+			return <Text>loading</Text>
+		}
+		console.log(this.state.current_list[x]);
 		// Default Student View with no functionality
 		if(this.props.view ==='student')
 		{
 
 			return(
 				<Container>
-				<List renderSectionHeader={()=>(<ListItem><Text>Name:</Text></ListItem>)}>
-					{this.state.current_list.map((data, i) => (
+
+
+
+					<List renderSectionHeader={()=>(<ListItem><Text>Name:</Text></ListItem>)}>
+					{this.state.current_list[x].map((data, i) => (
 						<ListItem key={i}>
 							<Left>
-								<Text>{data}</Text>
+								<Text>{data.studentName}</Text>
 							</Left>
 							<Body>
 								<Text>Help Time: {this.getTime(i)}</Text>
@@ -276,6 +296,15 @@ export default class WaitList extends Component {
 					</ListItem>
 					))}
 				 </List>
+
+
+
+
+
+
+
+
+
 				</Container>
 			)
 
@@ -482,4 +511,8 @@ const styles = StyleSheet.create({
 	backgroundColor: "#FFF"
   },
 });
+
+
+
+
 
