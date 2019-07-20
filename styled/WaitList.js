@@ -21,6 +21,7 @@ import {
   Body,
   Subtitle,
   CheckBox,
+  Spinner,
   View
 } from "native-base";
 
@@ -31,9 +32,8 @@ export default class WaitList extends Component {
 	constructor(props)
 	{
 		super(props);
-	
-		this.state= {
-			current_course: '',
+		this.state = {
+			current_course: [],
 			current_list: [],
 			course_list: [],
 			course_ids: [],
@@ -81,6 +81,8 @@ export default class WaitList extends Component {
 	helpStudent()
 	{
 		let list = this.state.current_list.filter( (name,index) => index !== this.state.selectedStudentIndex);
+		console.log(this.state.current_course);
+		
 		this.setState({current_list:list})
 		this.toggleModal();
 	}
@@ -106,12 +108,12 @@ export default class WaitList extends Component {
 
 	}
 
-	componentWillMount(props)
-	{
-		console.log(this.props);
-		let url = 'https://protected-shelf-85013.herokuapp.com/session/inProgress/' + this.props.courseId + '/';
-		fetch(url).then(response => response.json()).then(data => {console.log(data)});
-	}
+	// componentWillMount(props)
+	// {
+	// 	console.log(this.props);
+	// 	let url = 'https://protected-shelf-85013.herokuapp.com/session/inProgress/' + this.props.courseId + '/';
+	// 	fetch(url).then(response => response.json()).then(data => {console.log(data)});
+	// }
 
 	// Fetch for TA authorization
 	validateTa()
@@ -160,58 +162,9 @@ export default class WaitList extends Component {
 	
 	}
 
-	componentWillMount() 
-	{   
-		let course_arr = [];
-		let course_ids = [];
-		let temp_list = [];
-
-		let url = 'https://protected-shelf-85013.herokuapp.com/course/'
-		fetch(url).then(response => response.json()).then(data => {
-
-			console.log(data);
-			for(let i = 0; i < data.length; i++)
-			{
-				if(data[i].active)
-				{   
-					let course_title = data[i].courseName;
-					let title = course_title.slice(0,3);
-					let code = course_title.slice(3);
-					let alias = [];
-					alias.push(course_title.charAt(0));
-					for(let j = 1; j < course_title.length - 1; j++)
-					{
-						if(course_title.charAt(j) === ' ')
-						{
-							if(course_title.charAt(j+1) === 'I')
-							{
-								if(j === course_title.length - 2)
-									alias.push('1');
-								else if(course_title.charAt(j+2) === 'I')
-									alias.push('2');
-							}
-							else    
-								alias.push(course_title.charAt(j+1));
-						}
-					}
-					course_ids.push(data[i].courseId);
-					course_arr.push(alias.join("").toUpperCase());
-				}   
-			}
-
-			for(let i = 0; i < course_ids.length; i++)
-			{
-				let ext = course_ids[i];	
-				let nested_url = 'https://protected-shelf-85013.herokuapp.com/session/waiting/'+ ext +'/';
-				fetch(nested_url).then(res => res.json()).then(list=>{
-				
-					temp_list.push(list);
-			})}
-
-		this.setState({course_list:course_arr, course_ids:course_ids});
-		this.setState({current_list:temp_list, loading:false})
-		});
-		console.log(temp_list);
+	componentWillMount(props) 
+	{
+	
 	}
 	
 	handleTimeIn()
@@ -242,7 +195,7 @@ export default class WaitList extends Component {
 		x[i] = !x[i];
 		this.setState({current_ta_courses_checked:x})
 	}
-		
+	
 	handleDatePicked(date)
 	{
 		let time = date.getHours() + ":" + date.getMinutes();
@@ -255,37 +208,26 @@ export default class WaitList extends Component {
 			this.setState({ta_time_out:time})
 		}
 		this.hideDateTimePicker();
-   };
-
+	}
+	
 	render(props) 
 	{
-
-		console.log(this.state.course_ids);
-		let x = 0;
-		for(let i = 0; i < this.state.current_list.length; i++)
+		let course = this.props.course;
+		let index = this.props.selection;
+		
+		if(course === undefined || course[this.props.selection] === undefined || course[this.props.selection].waitlist === undefined)
 		{
-			if(this.state.course_ids[i] === this.props.courseId)
-			{
-				x = i;
-				console.log('found x = ' + i)
-			}
+			return <Spinner color="blue" />;
 		}
-		if(this.state.loading  || this.state.current_list[x] == undefined)
-		{
-			return <Text>loading</Text>
-		}
-		console.log(this.state.current_list[x]);
+		
 		// Default Student View with no functionality
 		if(this.props.view ==='student')
 		{
 
 			return(
 				<Container>
-
-
-
 					<List renderSectionHeader={()=>(<ListItem><Text>Name:</Text></ListItem>)}>
-					{this.state.current_list[x].map((data, i) => (
+					{course[this.props.selection].waitlist.map((data, i) => (
 						<ListItem key={i}>
 							<Left>
 								<Text>{data.studentName}</Text>
@@ -296,15 +238,6 @@ export default class WaitList extends Component {
 					</ListItem>
 					))}
 				 </List>
-
-
-
-
-
-
-
-
-
 				</Container>
 			)
 
@@ -343,10 +276,10 @@ export default class WaitList extends Component {
 
 					<Content>
 						<List>
-						{this.state.current_list.map((data, i) => (
+						{course[this.props.selection].waitlist.map((data, i) => (
 						  <ListItem button onPress={()=>this.selectStudent(data, i)}key={i}>
 							<Left>
-							  <Text>{data}</Text>
+							  <Text>{data.studentName}</Text>
 							</Left>
 							<Right>
 							  <Icon name="arrow-forward" />
