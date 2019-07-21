@@ -25,7 +25,7 @@ export default class TabBar extends React.Component {
 			TA: false,
 			help: false,
 			loading1: true,
-			loading2: true,
+			loading2: false,
 			addStudent: '',
 		}
 		this.movePage = this.movePage.bind(this);
@@ -58,6 +58,11 @@ export default class TabBar extends React.Component {
 				if(data[i].active)
 				{   
 					let obj_state = {};
+
+
+					
+
+
 					fetch('https://protected-shelf-85013.herokuapp.com/session/waiting/'+ data[i].courseId +'/')
 					.then(resp=>resp.json()).then(list=>{
 						obj_state.course_title = course_title;
@@ -106,9 +111,23 @@ export default class TabBar extends React.Component {
 
 	addStudent()
 	{
-		let list = this.state.waitlist;
-		list.push(this.state.addStudent);
-		this.setState({waitlist:list});
+		this.setState({loading2:true})
+		
+		console.log(this.state.current_course);
+		console.log(this.state.addStudent);
+		let url = 'https://protected-shelf-85013.herokuapp.com/session/kiosk/'
+		let options = {
+			method:'POST',
+			headers: { 	"Content-Type": "application/json; charset=UTF-8" },
+			body:JSON.stringify({
+				courseId:this.state.current_course,
+				studentName:this.state.addStudent
+			})	
+		}
+		fetch(url, options).then(response=>response.json()).then(data=>{
+			this.setState({loading2:false})
+		})
+		this.componentWillMount();	
 		this.toggleSignIn();
 	}
 	
@@ -116,9 +135,16 @@ export default class TabBar extends React.Component {
 	{
 		let arr = [];
 		
-		if(this.state.loading1)
+		if(this.state.loading1 || this.state.loading2 
+		|| this.state.courses_and_lists === undefined 
+		|| this.state.courses_and_lists[this.state.current_course_selection] === undefined)
 		{
 			return <Spinner color="blue" />;
+		}
+		
+		if(this.state.courses_and_lists[this.state.current_course_selection].waitlist === undefined )
+		{
+			console.log('empty list');
 		}
 
 		for(let i = 0; i < this.state.courses.length; i++)

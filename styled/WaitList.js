@@ -57,6 +57,7 @@ export default class WaitList extends Component {
 			ta_time_out: null,
 			in_selected: true,
 			loading: true,
+			taPin: '',
 		}
 		this.toggleModal = this.toggleModal.bind(this);
 		this.selectStudent = this.selectStudent.bind(this);
@@ -108,16 +109,14 @@ export default class WaitList extends Component {
 
 	}
 
-	// componentWillMount(props)
-	// {
-	// 	console.log(this.props);
-	// 	let url = 'https://protected-shelf-85013.herokuapp.com/session/inProgress/' + this.props.courseId + '/';
-	// 	fetch(url).then(response => response.json()).then(data => {console.log(data)});
-	// }
-
 	// Fetch for TA authorization
 	validateTa()
 	{
+		console.log(this.state.taPin);
+
+		
+
+
 		this.setState({validTA:true});
 	}
 
@@ -162,6 +161,7 @@ export default class WaitList extends Component {
 	
 	}
 
+	// Needs to fetch average wait time and convert to minutes per session
 	componentWillMount(props) 
 	{
 	
@@ -420,7 +420,7 @@ export default class WaitList extends Component {
 						  <Form>
 							<Item floatingLabel>
 								<Label>Enter TA Pin</Label>
-								<Input maxLength={5}/>
+								<Input onChangeText={(text)=>{this.setState({taPin:text})}}	maxLength={5}/>
 							</Item>
 						</Form>
 						<Button block onPress={this.validateTa} style={{ margin: 15, marginTop: 50 }}>
