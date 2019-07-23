@@ -59,8 +59,10 @@ export default class TabBar extends React.Component {
 				{   
 					let obj_state = {};
 
-
-					
+					fetch('https://protected-shelf-85013.herokuapp.com/session/kiosk/waitTime/' + data[i].courseId + '/')
+					.then(r=>r.json()).then(avg_wait=>{
+						obj_state.avg_wait = avg_wait;
+					})
 
 
 					fetch('https://protected-shelf-85013.herokuapp.com/session/waiting/'+ data[i].courseId +'/')
@@ -141,6 +143,7 @@ export default class TabBar extends React.Component {
 		{
 			return <Spinner color="blue" />;
 		}
+		console.log(this.state.courses_and_lists);
 		
 		if(this.state.courses_and_lists[this.state.current_course_selection].waitlist === undefined )
 		{
@@ -164,13 +167,13 @@ export default class TabBar extends React.Component {
 				<Header hasTabs ><Tabs onChangeTab={({i})=>this.setState({current_course_selection:i, current_course:this.state.courses_and_lists[i].courseId})}>{arr}</Tabs></Header>
 					<Header style={{justifyContent:'center',alignItems:'center', backgroundColor: "#FFF",marginBottom:10}}><Left style={{justifyContent:'flex-end',textAlign:'right', backgroundColor: "#FFF",marginBottom:10}}><Text>Names</Text></Left><Right style={{justifyContent:'flex-end', backgroundColor: "#FFF",marginBottom:10}}><Text>Estimated Help Time</Text></Right></Header>
 					<ScrollView><WaitList course={this.state.courses_and_lists} selection={this.state.current_course_selection} view='student' /></ScrollView>
-					<Button small block primary onPress={this.movePage}style={{marginBottom: 5, marginTop: 18}}>
+					<Button block primary onPress={this.movePage}style={{marginBottom: 5, marginTop: 18}}>
 		            	<Text>TA Access</Text>
 		        	</Button>
-					<Button small block primary onPress={this.toggleSignIn} style={styles.mb15}>
+					<Button block primary onPress={this.toggleSignIn} style={styles.mb15}>
 		            	<Text>Student Sign In</Text>
 		        	</Button>
-					<Button small block primary onPress={this.helpMe} style={styles.mb15}>
+					<Button block primary onPress={this.helpMe} style={styles.mb15}>
 		            	<Text>Need Help?</Text>
 		        	</Button>
 					<Modal

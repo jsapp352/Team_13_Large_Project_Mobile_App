@@ -50,7 +50,7 @@ export default class WaitList extends Component {
 			current_ta_courses: ['CS1','CS2','OOP'],
 			current_ta_courses_checked: [false,false,false],
 			selectedCourses: [],
-			num_tas: 3,
+			num_tas: 1,
 			avg_wait: 5,
 			showTimePicker: false,
 			ta_time_in: null,
@@ -58,6 +58,9 @@ export default class WaitList extends Component {
 			in_selected: true,
 			loading: true,
 			taPin: '',
+			taName: '',
+			error:'',
+			valid_Ta_for_signin: false,
 		}
 		this.toggleModal = this.toggleModal.bind(this);
 		this.selectStudent = this.selectStudent.bind(this);
@@ -72,6 +75,7 @@ export default class WaitList extends Component {
 		this.markAbsent = this.markAbsent.bind(this);
 		this.handleTimeIn = this.handleTimeIn.bind(this);
 		this.handleTimeOut = this.handleTimeOut.bind(this);
+		this.getTA = this.getTA.bind(this)
 	}
 
 	toggleModal()
@@ -81,17 +85,45 @@ export default class WaitList extends Component {
 
 	helpStudent()
 	{
-		let list = this.state.current_list.filter( (name,index) => index !== this.state.selectedStudentIndex);
-		console.log(this.state.current_course);
-		
-		this.setState({current_list:list})
+		let url = 'https://protected-shelf-85013.herokuapp.com/session/kiosk/startTutor/'
+		let options = {
+			method:'PUT',
+			headers: { 	"Content-Type": "application/json; charset=UTF-8" },
+			body:JSON.stringify({
+				encryptedPin:this.state.taPin,
+				sessionId:this.state.selectedSessionId
+			})	
+		}
+
+		console.log(options);
+		console.log(fetch(url, options).then(response=>response.json()).then(data=>{
+			console.log(data);
+			this.setState({canceled:true})
+		})
+		)
+
 		this.toggleModal();
 	}
 
 	markAbsent()
 	{
-		let list = this.state.current_list.filter( (name,index) => index !== this.state.selectedStudentIndex);
-		this.setState({current_list:list})
+
+		let url = 'https://protected-shelf-85013.herokuapp.com/session/kiosk/cancelTutor/'
+		let options = {
+			method:'PUT',
+			headers: { 	"Content-Type": "application/json; charset=UTF-8" },
+			body:JSON.stringify({
+				encryptedPin:this.state.taPin,
+				sessionId:this.state.selectedSessionId
+			})	
+		}
+		console.log(options);
+	
+		fetch(url, options).then(response=>response.json()).then(data=>{
+			this.setState({canceled:true})
+		})
+		// let list = this.state.current_list.filter( (name,index) => index !== this.state.selectedStudentIndex);
+		// this.setState({current_list:list})
 		this.toggleModal();
 	}
 	
@@ -109,20 +141,54 @@ export default class WaitList extends Component {
 
 	}
 
+	encryptPin()
+    {
+        var CryptoJS = require("crypto-js");
+
+        // This secret key phrase must match the one on the API server.
+        // Should be replaced with environment variable.
+        const keyString = "donteverlookatme";
+
+        // Convert the key string to a data array type
+        var key = CryptoJS.enc.Utf8.parse(keyString);
+        console.log(key);    
+
+        // Encrypt the PIN
+        var encryptedPinBytes = CryptoJS.AES.encrypt(this.state.taPpin, key, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+        });
+
+        // Convert the encrypted PIN data array to a hex string
+        var encryptedPinHexString = encryptedPinBytes.ciphertext.toString();
+        console.log(`PIN ${this.state.taPin}: ${encryptedPinHexString}`);
+
+        return encryptedPinHexString;
+    }
+
 	// Fetch for TA authorization
 	validateTa()
 	{
-		console.log(this.state.taPin);
+		const encryptedPin = encodeURIComponent(this.encryptPin());
+		console.log(encryptedPin);
+		const options = {
+            method: 'POST',
+            headers: { "Content-Type": "application/json; charset=UTF-8" },
+			body: JSON.stringify({encryptedPin:encryptedPin})
+        };
 
-		
-
-
-		this.setState({validTA:true});
+        fetch('https://protected-shelf-85013.herokuapp.com/user/kiosk/pin/', options)
+            .then(response => response.json())
+            .then(data => {
+                this.setState({taName: data.name});
+				this.setState({validTA:true});
+            }).catch(err=>{this.setState({error:'INVALID PIN'})})
 	}
 
 	selectStudent(student, i)
 	{
-		this.setState({selectedStudent:student, selectedStudentIndex:i});
+		console.log(student)
+		this.setState({selectedStudent:student.studentName, selectedStudentIndex:i, selectedSessionId:student.sessionId});
 		this.toggleModal();
 	}
 
@@ -131,42 +197,43 @@ export default class WaitList extends Component {
 		this.setState({canceled:true});
 	}
 
-	getTime(i)
+	getTime(avg_wait, i)
 	{
 		let hours = new Date().getHours() ;
 		let mins = new Date().getMinutes();
+		
+		if(avg_wait < 0)
+			avg_wait = 5;
+		
+		if(avg_wait > 30)
+			avg_wait = 30;
 
-		mins += Math.round(i * this.state.avg_wait / this.state.num_tas);       
+		mins += Math.round(i * avg_wait / this.state.num_tas);       
 		if(mins > 59)
 		{
 			mins -= 60;
 			hours++;
-		}       
+		} 
+      
+		let am_pm = ' PM';
+		if(hours <= 11)
+			am_pm = ' AM';
 
 		if(hours > 12)
 		{
 			hours -= 12;
 		}
 		
-		let am_pm = ' PM';
 		let zero = '';
 
 		if(mins < 10)
 			zero = '0';
 
-		if(hours > 12)
-			am_pm = ' AM';
 
 		return(hours + ":" + zero + mins + am_pm);
 	
 	}
 
-	// Needs to fetch average wait time and convert to minutes per session
-	componentWillMount(props) 
-	{
-	
-	}
-	
 	handleTimeIn()
 	{
 		this.setState({in_selected:true});
@@ -196,9 +263,29 @@ export default class WaitList extends Component {
 		this.setState({current_ta_courses_checked:x})
 	}
 	
+	getTA()
+	{
+		// let url = 'https://protected-shelf-85013.herokuapp.com/course/teacher/tacourses/'
+		
+
+
+		this.setState({valid_Ta_for_signin:true});
+	}
+	
 	handleDatePicked(date)
 	{
-		let time = date.getHours() + ":" + date.getMinutes();
+		let time = '';
+
+		if(date.getHours() === 0)
+			time = '12';
+		else
+			time = date.getHours() + '';
+			
+		if(date.getMinutes() < 10)
+			time = time + ":0" + date.getMinutes();
+		else
+			time = time + ':' + date.getMinutes();
+
 		if(this.state.in_selected)
 		{
 			this.setState({ta_time_in:time})
@@ -214,12 +301,13 @@ export default class WaitList extends Component {
 	{
 		let course = this.props.course;
 		let index = this.props.selection;
-		
 		if(course === undefined || course[this.props.selection] === undefined || course[this.props.selection].waitlist === undefined)
 		{
 			return <Spinner color="blue" />;
 		}
-		
+		let avg_wait = course[index].avg_wait / 60;
+
+		console.log(course[index]);
 		// Default Student View with no functionality
 		if(this.props.view ==='student')
 		{
@@ -232,9 +320,9 @@ export default class WaitList extends Component {
 							<Left>
 								<Text>{data.studentName}</Text>
 							</Left>
-							<Body>
-								<Text>Help Time: {this.getTime(i)}</Text>
-							</Body>
+							<Right style={{justifyContent:'flex-end'}}>
+								<Text>{this.getTime(avg_wait, i)}</Text>
+							</Right>
 					</ListItem>
 					))}
 				 </List>
@@ -317,6 +405,30 @@ export default class WaitList extends Component {
 		// Shows TA Login Page when Sign in for Office hours is selected
 		else if(this.state.logInTa)
 		{
+			if(!this.state.valid_Ta_for_signin)
+			{
+				return(
+					<Modal
+					animationType="slide"
+					transparent={false}
+					visible={!this.state.valid_Ta_for_signin}
+					>
+					<Content>
+					<Form>
+						<Item floatingLabel>
+						  <Label>Enter TA Pin</Label>
+						  <Input maxLength={6}/>
+						</Item>
+						<View style={{marginTop: 15, flex:1, flexDirection:'column', justifyContent:'center'}}>
+							<Button block style={{ margin: 15, marginTop: 10 }}  onPress={this.getTA}>
+								<Text>Submit</Text>
+							</Button>
+						</View>	
+					</Form>
+					</Content>
+					</Modal>
+				)
+			}
 			
 			return(
 				<Modal
@@ -326,27 +438,16 @@ export default class WaitList extends Component {
 					>
 					<Content>
 					<Form>
-						<Item floatingLabel>
-						  <Label>Enter TA Pin</Label>
-						  <Input maxLength={5}/>
-						</Item>
-						<Item floatingLabel>
-						  <Label>Enter Your Name</Label>
-						  <Input/>
-						</Item>
 						<View style={{marginTop: 15, flex:1, flexDirection:'column', justifyContent:'center'}}>
-							<Item>
-							<Label>{this.state.ta_time_in}</Label>
-							<Button small style={{ margin: 15, marginTop: 10 }} block onPress={this.handleTimeIn}>
-								<Text>Time In</Text>
-							</Button>
-							</Item>
-							<Button small style={{ margin: 15, marginTop: 10 }} block onPress={this.handleTimeOut}>
-								<Text>Time Out</Text>
+							<Button block style={{ margin: 15, marginTop: 10 }}  onPress={this.handleTimeIn}>
+								<Text>Time In: {this.state.ta_time_in}</Text>
+							</Button>							
+							<Button block style={{ margin: 15, marginTop: 10 }} block onPress={this.handleTimeOut}>
+								<Text>Time Out: {this.state.ta_time_out}</Text>
 							</Button>
 						</View>
 						<View style={{marginTop: 10, flex:1, flexDirection:'column', justifyContent:'center'}}>
-							<Button small style={{ margin: 15, marginTop: 10 }} block onPress={()=>{this.setState({showCourseList:true})}}>
+							<Button block style={{ margin: 15, marginTop: 10 }} block onPress={()=>{this.setState({showCourseList:true})}}>
 								<Text>Select Courses</Text>
 							</Button>
 						</View>
@@ -360,8 +461,11 @@ export default class WaitList extends Component {
 					  onConfirm={this.handleDatePicked}
 					  onCancel={this.hideDateTimePicker}
 					/>  
-					<Button style={{ margin: 15, marginTop: 50 }} block onPress={this.goBack}>
+					<Button style={{ margin: 15, marginTop: 50 }} block disabled={this.state.ta_time_in === null || this.state.ta_time_out === null} onPress={this.goBack}>
 						<Text>Submit</Text>
+					</Button>
+					<Button style={{ margin: 15, marginTop: 50 }} block onPress={this.goBack}>
+						<Text>Cancel</Text>
 					</Button>
 					</Content>
 					<Modal 
@@ -420,8 +524,9 @@ export default class WaitList extends Component {
 						  <Form>
 							<Item floatingLabel>
 								<Label>Enter TA Pin</Label>
-								<Input onChangeText={(text)=>{this.setState({taPin:text})}}	maxLength={5}/>
+								<Input onChangeText={(text)=>{this.setState({taPin:text})}}	maxLength={6}/>
 							</Item>
+						<Text>{this.state.error}</Text>
 						</Form>
 						<Button block onPress={this.validateTa} style={{ margin: 15, marginTop: 50 }}>
 							<Text>Manage List</Text>
