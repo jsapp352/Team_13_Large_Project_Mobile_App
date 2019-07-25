@@ -85,45 +85,41 @@ export default class WaitList extends Component {
 
 	helpStudent()
 	{
+		const encryptedPin = encodeURIComponent(this.encryptPin());
 		let url = 'https://protected-shelf-85013.herokuapp.com/session/kiosk/startTutor/'
 		let options = {
 			method:'PUT',
 			headers: { 	"Content-Type": "application/json; charset=UTF-8" },
 			body:JSON.stringify({
-				encryptedPin:this.state.taPin,
+				encryptedPin:encryptedPin,
 				sessionId:this.state.selectedSessionId
 			})	
 		}
 
-		console.log(options);
-		console.log(fetch(url, options).then(response=>response.json()).then(data=>{
-			console.log(data);
+		fetch(url, options).then(response=>response.json()).then(data=>{
 			this.setState({canceled:true})
-		})
-		)
+		}) 
 
 		this.toggleModal();
 	}
 
 	markAbsent()
 	{
-
+		const encryptedPin = encodeURIComponent(this.encryptPin());
 		let url = 'https://protected-shelf-85013.herokuapp.com/session/kiosk/cancelTutor/'
 		let options = {
 			method:'PUT',
 			headers: { 	"Content-Type": "application/json; charset=UTF-8" },
 			body:JSON.stringify({
-				encryptedPin:this.state.taPin,
+				encryptedPin:encryptedPin,
 				sessionId:this.state.selectedSessionId
 			})	
 		}
-		console.log(options);
 	
 		fetch(url, options).then(response=>response.json()).then(data=>{
 			this.setState({canceled:true})
 		})
-		// let list = this.state.current_list.filter( (name,index) => index !== this.state.selectedStudentIndex);
-		// this.setState({current_list:list})
+		
 		this.toggleModal();
 	}
 	
@@ -136,58 +132,56 @@ export default class WaitList extends Component {
 		this.toggleModal();
 	}
 	
-	clearList()
-	{
-
-	}
-
 	encryptPin()
     {
         var CryptoJS = require("crypto-js");
 
         // This secret key phrase must match the one on the API server.
         // Should be replaced with environment variable.
-        const keyString = "donteverlookatme";
+        const keyString = "hurricanstrictor";
 
         // Convert the key string to a data array type
         var key = CryptoJS.enc.Utf8.parse(keyString);
-        console.log(key);    
 
         // Encrypt the PIN
-        var encryptedPinBytes = CryptoJS.AES.encrypt(this.state.taPpin, key, {
+        var encryptedPinBytes = CryptoJS.AES.encrypt(this.state.taPin, key, {
             mode: CryptoJS.mode.ECB,
             padding: CryptoJS.pad.Pkcs7
         });
 
         // Convert the encrypted PIN data array to a hex string
         var encryptedPinHexString = encryptedPinBytes.ciphertext.toString();
-        console.log(`PIN ${this.state.taPin}: ${encryptedPinHexString}`);
-
+	
         return encryptedPinHexString;
     }
 
 	// Fetch for TA authorization
+	// 206131 -> PIN
 	validateTa()
 	{
 		const encryptedPin = encodeURIComponent(this.encryptPin());
-		console.log(encryptedPin);
 		const options = {
             method: 'POST',
             headers: { "Content-Type": "application/json; charset=UTF-8" },
 			body: JSON.stringify({encryptedPin:encryptedPin})
         };
-
-        fetch('https://protected-shelf-85013.herokuapp.com/user/kiosk/pin/', options)
+    	fetch('https://protected-shelf-85013.herokuapp.com/user/kiosk/pin/', options)
             .then(response => response.json())
             .then(data => {
-                this.setState({taName: data.name});
-				this.setState({validTA:true});
+				if(data.status === 500)
+				{
+					this.setState({validTA:false, error:'INVALID PIN'})
+				}
+				else
+				{
+                	this.setState({taName: data.name});
+					this.setState({validTA:true});
+				}
             }).catch(err=>{this.setState({error:'INVALID PIN'})})
 	}
 
 	selectStudent(student, i)
 	{
-		console.log(student)
 		this.setState({selectedStudent:student.studentName, selectedStudentIndex:i, selectedSessionId:student.sessionId});
 		this.toggleModal();
 	}
@@ -209,7 +203,7 @@ export default class WaitList extends Component {
 			avg_wait = 30;
 
 		mins += Math.round(i * avg_wait / this.state.num_tas);       
-		if(mins > 59)
+		while(mins > 59)
 		{
 			mins -= 60;
 			hours++;
@@ -229,9 +223,7 @@ export default class WaitList extends Component {
 		if(mins < 10)
 			zero = '0';
 
-
 		return(hours + ":" + zero + mins + am_pm);
-	
 	}
 
 	handleTimeIn()
@@ -263,12 +255,15 @@ export default class WaitList extends Component {
 		this.setState({current_ta_courses_checked:x})
 	}
 	
+
+	// Needs USERID to be working. This should get the course list for a given TA and update
+	// state for selection. 
 	getTA()
 	{
-		// let url = 'https://protected-shelf-85013.herokuapp.com/course/teacher/tacourses/'
+		// let url = 'https://protected-shelf-85013.herokuapp.com/course/ta/'
+
+
 		
-
-
 		this.setState({valid_Ta_for_signin:true});
 	}
 	
@@ -307,7 +302,6 @@ export default class WaitList extends Component {
 		}
 		let avg_wait = course[index].avg_wait / 60;
 
-		console.log(course[index]);
 		// Default Student View with no functionality
 		if(this.props.view ==='student')
 		{
@@ -334,7 +328,7 @@ export default class WaitList extends Component {
 		// Return to Home Page if canceled
 		else if(this.state.canceled)
 		{
-			return <TabBar />
+			return <TabBar index={index}/>
 		}   
 
 		// Shows the TA Portal upon successful TA Login

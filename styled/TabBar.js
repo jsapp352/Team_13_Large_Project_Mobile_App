@@ -6,9 +6,11 @@ import HelpMenu from './HelpMenu'
 
 export default class TabBar extends React.Component {
 
-	constructor()
+	constructor(props)
 	{
 		super();
+		let index = 0;
+
 		this.state = {
 
 			courses_and_lists: [],
@@ -115,8 +117,6 @@ export default class TabBar extends React.Component {
 	{
 		this.setState({loading2:true})
 		
-		console.log(this.state.current_course);
-		console.log(this.state.addStudent);
 		let url = 'https://protected-shelf-85013.herokuapp.com/session/kiosk/'
 		let options = {
 			method:'POST',
@@ -133,7 +133,7 @@ export default class TabBar extends React.Component {
 		this.toggleSignIn();
 	}
 	
-	render() 
+	render(props) 
 	{
 		let arr = [];
 		
@@ -143,13 +143,7 @@ export default class TabBar extends React.Component {
 		{
 			return <Spinner color="blue" />;
 		}
-		console.log(this.state.courses_and_lists);
 		
-		if(this.state.courses_and_lists[this.state.current_course_selection].waitlist === undefined )
-		{
-			console.log('empty list');
-		}
-
 		for(let i = 0; i < this.state.courses.length; i++)
 		{
 			arr.push(<Tab  key={i} heading={this.state.courses[i]}></Tab>)
@@ -181,20 +175,20 @@ export default class TabBar extends React.Component {
 				        transparent={false}
 				        visible={this.state.student}
 						>
-						<Content>
-				          <Form>
-				            <Item floatingLabel>
-				              <Label>Enter Name</Label>
-				              <Input onChangeText={(event)=>(this.setState({addStudent:event}))} />
-				            </Item>
-				          </Form>
-				          <Button block onPress={this.addStudent} style={{ margin: 15, marginTop: 50 }}>
-				            <Text>Sign In</Text>
-				          </Button>
-						  <Button block onPress={this.toggleSignIn} style={{ margin: 15, marginTop: 15 }}>
-				            <Text>Cancel</Text>
-				          </Button>
-				        </Content>
+					<Content>
+			          <Form>
+			            <Item floatingLabel>
+			              <Label>Enter Name</Label>
+			              <Input onChangeText={(event)=>(this.setState({addStudent:event}))} />
+			            </Item>
+			          </Form>
+			          <Button block onPress={this.addStudent} style={{ margin: 15, marginTop: 50 }}>
+			            <Text>Sign In</Text>
+			          </Button>
+					  <Button block onPress={this.toggleSignIn} style={{ margin: 15, marginTop: 15 }}>
+			            <Text>Cancel</Text>
+			          </Button>
+			        </Content>
 					</Modal>
 			</Container>
 		);
