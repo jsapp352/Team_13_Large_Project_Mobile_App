@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { StyleSheet, ScrollView, Modal } from 'react-native';
 import DateTimePicker from "react-native-modal-datetime-picker";
-import TabBar from './TabBar'
+import TabBar from './TabBar.js'
+import InProgress from './InProgress.js'
 import {
   Container,
   Header,
@@ -33,11 +34,10 @@ export default class WaitList extends Component {
 	{
 		super(props);
 		this.state = {
-			current_course: [],
+			current_course: -1,
 			current_list: [],
 			course_list: [],
 			course_ids: [],
-			current_status: ['h','h','h','w','w','w','w','w'],
 			course_waitlists:[],
 			modalView: false,
 			selectedStudent: '',
@@ -61,6 +61,7 @@ export default class WaitList extends Component {
 			taName: '',
 			error:'',
 			valid_Ta_for_signin: false,
+			goToInProgress: false,
 		}
 		this.toggleModal = this.toggleModal.bind(this);
 		this.selectStudent = this.selectStudent.bind(this);
@@ -125,11 +126,19 @@ export default class WaitList extends Component {
 	
 	postponeStudent()
 	{
-		let newSpot = this.state.current_list[this.state.selectedStudentIndex]
-		let list = this.state.current_list.filter( (name,index) => index !== this.state.selectedStudentIndex);
-		list.push(newSpot)
-		this.setState({current_list:list})
-		this.toggleModal();
+		this.markAbsent();
+		let url = 'https://protected-shelf-85013.herokuapp.com/session/kiosk/'
+		let options = {
+			method:'POST',
+			headers: { 	"Content-Type": "application/json; charset=UTF-8" },
+			body:JSON.stringify({
+				courseId:this.state.current_course,
+				studentName:this.state.selectedStudent
+			})	
+		}
+		fetch(url, options).then(response=>response.json()).then(data=>{
+			this.toggleModal();
+		})
 	}
 	
 	encryptPin()
@@ -157,8 +166,9 @@ export default class WaitList extends Component {
 
 	// Fetch for TA authorization
 	// 206131 -> PIN
-	validateTa()
+	validateTa(inProgessBoolean)
 	{
+		console.log(inProgessBoolean)
 		const encryptedPin = encodeURIComponent(this.encryptPin());
 		const options = {
             method: 'POST',
@@ -174,15 +184,23 @@ export default class WaitList extends Component {
 				}
 				else
 				{
-                	this.setState({taName: data.name});
-					this.setState({validTA:true});
+					if(inProgessBoolean)
+					{
+						this.setState({goToInProgress:true})
+					}
+					else
+					{
+                		this.setState({taName: data.name});
+						this.setState({validTA:true});
+					}
 				}
             }).catch(err=>{this.setState({error:'INVALID PIN'})})
 	}
 
 	selectStudent(student, i)
 	{
-		this.setState({selectedStudent:student.studentName, selectedStudentIndex:i, selectedSessionId:student.sessionId});
+		console.log(student);
+		this.setState({selectedStudent:student.studentName, selectedStudentIndex:i, selectedSessionId:student.sessionId, current_course:student.courseId});
 		this.toggleModal();
 	}
 
@@ -260,11 +278,53 @@ export default class WaitList extends Component {
 	// state for selection. 
 	getTA()
 	{
-		// let url = 'https://protected-shelf-85013.herokuapp.com/course/ta/'
+		const encryptedPin = encodeURIComponent(this.encryptPin());
+		const options = {
+            method: 'POST',
+            headers: { "Content-Type": "application/json; charset=UTF-8" },
+			body: JSON.stringify({encryptedPin:encryptedPin})
+        };
+    	fetch('https://protected-shelf-85013.herokuapp.com/user/kiosk/pin/', options)
+            .then(response => response.json())
+            .then(data => {
+				console.log(data);
+				if(data.status === 500)
+				{
+					this.setState({validTA:false, error:'INVALID PIN'})
+				}
+				else
+				{
+					let courseUrl = 'https://protected-shelf-85013.herokuapp.com/course/ta/'
+					const courseOptions = {
+			            method: 'GET',
+			            headers: { 
+							"Content-Type": "application/json; charset=UTF-8",
+							"Authorization": '',		
+						 },
+			        };
+
+					fetch(courseUrl, courseOptions).then(res=>res.json()).then(courseList=>{
+						let taList = [];
+						let taListChecks = [];
+						console.log('CourseList = ' + courseList)
+						for(let i = 0; i < courseList.length; i++)
+						{
+							if(courseList[i].active)
+							{
+								taList.push(courseList[i].courseName);
+								taListChecks.push(false);
+							}
+						}
+
+						this.setState({current_ta_courses:taList, current_ta_courses_checked:taListChecks})
+					}).catch(e=>{console.log(e)})
+					// fetch()
 
 
-		
-		this.setState({valid_Ta_for_signin:true});
+                	this.setState({taName: data.name});
+					this.setState({valid_Ta_for_signin:true});
+				}
+            }).catch(err=>{this.setState({error:'INVALID PIN'})})
 	}
 	
 	handleDatePicked(date)
@@ -301,7 +361,7 @@ export default class WaitList extends Component {
 			return <Spinner color="blue" />;
 		}
 		let avg_wait = course[index].avg_wait / 60;
-
+		console.log(course[index])
 		// Default Student View with no functionality
 		if(this.props.view ==='student')
 		{
@@ -324,7 +384,11 @@ export default class WaitList extends Component {
 			)
 
 		}
-
+		else if(this.state.goToInProgress)
+		{
+			const pin = encodeURIComponent(this.encryptPin());
+			return <InProgress pin={pin} />
+		}
 		// Return to Home Page if canceled
 		else if(this.state.canceled)
 		{
@@ -359,7 +423,7 @@ export default class WaitList extends Component {
 					<Content>
 						<List>
 						{course[this.props.selection].waitlist.map((data, i) => (
-						  <ListItem button onPress={()=>this.selectStudent(data, i)}key={i}>
+						  <ListItem button onPress={()=>this.selectStudent(data, i)} key={i}>
 							<Left>
 							  <Text>{data.studentName}</Text>
 							</Left>
@@ -411,11 +475,15 @@ export default class WaitList extends Component {
 					<Form>
 						<Item floatingLabel>
 						  <Label>Enter TA Pin</Label>
-						  <Input maxLength={6}/>
+						  <Input onChangeText={(event)=> this.setState({taPin:event})} maxLength={6}/>
 						</Item>
+						<Text>{this.state.error}</Text>
 						<View style={{marginTop: 15, flex:1, flexDirection:'column', justifyContent:'center'}}>
 							<Button block style={{ margin: 15, marginTop: 10 }}  onPress={this.getTA}>
 								<Text>Submit</Text>
+							</Button>
+							<Button block style={{ margin: 15, marginTop: 10 }}  onPress={()=>{this.setState({logInTa:false})}}>
+								<Text>Cancel</Text>
 							</Button>
 						</View>	
 					</Form>
@@ -522,15 +590,23 @@ export default class WaitList extends Component {
 							</Item>
 						<Text>{this.state.error}</Text>
 						</Form>
-						<Button block onPress={this.validateTa} style={{ margin: 15, marginTop: 50 }}>
-							<Text>Manage List</Text>
+
+						<Button block onPress={()=>this.validateTa(false)} style={{ margin: 15, marginTop: 50 }}>
+							<Text>Manage Waitlist</Text>
 						</Button>
+
+						<Button block onPress={() => {this.validateTa(true)}} style={{ margin: 15, marginTop: 15 }}>
+							<Text>Manage Active Sessions</Text>
+						</Button>
+
 						<Button block onPress={() => {this.setState({logInTa:true})}} style={{ margin: 15, marginTop: 15 }}>
 							<Text>Sign In to Office Hours</Text>
-						  </Button>
-									<Button block onPress={this.goBack} style={{ margin: 15, marginTop: 15 }}>
+						</Button>
+			
+						<Button block onPress={this.goBack} style={{ margin: 15, marginTop: 15 }}>
 							<Text>Cancel</Text>
-						  </Button>
+						</Button>
+
 						</Content>
 					</Modal>
 			);
